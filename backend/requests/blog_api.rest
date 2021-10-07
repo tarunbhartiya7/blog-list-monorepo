@@ -1,0 +1,30 @@
+GET http://localhost:3003/api/blogs/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYxNWQxNTgwNTdkZGJjY2Q2MWE2MWMzYyIsImlhdCI6MTYzMzUwMjc0MSwiZXhwIjoxNjMzNTA2MzQxfQ.nzVtYUwzDt6tNJnh9hNUPZ-V8QGRxw3JLoM-DVOYzms
+
+###
+
+POST http://localhost:3003/api/blogs/
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYxNWQxNTgwNTdkZGJjY2Q2MWE2MWMzYyIsImlhdCI6MTYzMzUwMjc0MSwiZXhwIjoxNjMzNTA2MzQxfQ.nzVtYUwzDt6tNJnh9hNUPZ-V8QGRxw3JLoM-DVOYzms
+
+{
+    "title": "Dubai is awesome!",
+    "author": "JJ",
+    "url": "http://jj.com",
+    "likes": 10
+}
+
+###
+
+POST http://localhost:3003/api/blogs/
+content-type: application/json
+
+{
+    "author": "JJ"
+}
+
+###
+
+DELETE  http://localhost:3003/api/blogs/615ba8f368f5f375229e48b3
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYxNWQxNTgwNTdkZGJjY2Q2MWE2MWMzYyIsImlhdCI6MTYzMzUwMjc0MSwiZXhwIjoxNjMzNTA2MzQxfQ.nzVtYUwzDt6tNJnh9hNUPZ-V8QGRxw3JLoM-DVOYzms
+
