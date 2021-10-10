@@ -19,7 +19,7 @@ const App = () => {
         let initialBlogs = await blogService.getAll()
         const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
         setBlogs(sortedBlogs)
-      } catch {
+      } catch (error) {
         setMessage({
           message: 'cannot get blog data',
           type: 'error',
@@ -55,7 +55,7 @@ const App = () => {
       window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
 
       setUser(user)
-    } catch {
+    } catch (error) {
       setMessage({
         message: 'Wrong credentials',
         type: 'error',
