@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken')
 const blogsRouter = require('express').Router()
 
 const Blog = require('../models/blog')
@@ -45,6 +44,10 @@ blogsRouter.delete('/:id', async (request, response) => {
     } else {
       response.status(404).end()
     }
+  } else {
+    return response.status(401).json({
+      error: 'Not Authorized',
+    })
   }
 })
 
@@ -60,7 +63,7 @@ blogsRouter.put('/:id', async (request, response) => {
 
   const updatedNote = await Blog.findByIdAndUpdate(request.params.id, blog, {
     new: true,
-  })
+  }).populate('user', { blogs: 0 })
   response.json(updatedNote)
 })
 

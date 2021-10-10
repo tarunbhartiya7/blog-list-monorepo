@@ -28,3 +28,9 @@ h1 {
   padding: 10px;
   margin-bottom: 10px;
 }
+
+.blogStyle {
+  padding: 10px;
+  border: 1px solid;
+  margin-bottom: 5px;
+}

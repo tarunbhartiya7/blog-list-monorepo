@@ -1,28 +1,40 @@
-import React, { useState, useEffect } from "react"
-import Blog from "./components/Blog"
-import LoginForm from "./components/LoginForm"
-import BlogForm from "./components/BlogForm"
-import Notification from "./components/Notification"
-import blogService from "./services/blogs"
-import loginService from "./services/login"
+import React, { useState, useEffect, useRef } from 'react'
+import Blog from './components/Blog'
+import LoginForm from './components/LoginForm'
+import BlogForm from './components/BlogForm'
+import Notification from './components/Notification'
+import blogService from './services/blogs'
+import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [message, setMessage] = useState(null)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
   const [user, setUser] = useState(null)
+  const blogFormRef = useRef()
 
   useEffect(() => {
-    if (user) {
-      blogService.getAll().then((initialNotes) => {
-        setBlogs(initialNotes)
-      })
+    const fetchBlogs = async () => {
+      try {
+        let initialBlogs = await blogService.getAll()
+        const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
+        setBlogs(sortedBlogs)
+      } catch {
+        setMessage({
+          message: 'cannot get blog data',
+          type: 'error',
+        })
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      }
     }
+
+    if (user) fetchBlogs()
   }, [user])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser")
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
@@ -31,27 +43,22 @@ const App = () => {
   }, [])
 
   const handleLogout = () => {
-    window.localStorage.removeItem("loggedBlogAppUser")
+    window.localStorage.removeItem('loggedBlogAppUser')
     setUser(null)
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
-
+  const handleLogin = async (userObject) => {
     try {
-      const user = await loginService.login({
-        username,
-        password,
-      })
-      window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user))
+      const user = await loginService.login(userObject)
+
       blogService.setToken(user.token)
+      window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
+
       setUser(user)
-      setUsername("")
-      setPassword("")
-    } catch (exception) {
+    } catch {
       setMessage({
-        message: "Wrong credentials",
-        type: "error",
+        message: 'Wrong credentials',
+        type: 'error',
       })
       setTimeout(() => {
         setMessage(null)
@@ -63,9 +70,10 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
+      blogFormRef.current.toggleVisibility()
       setMessage({
         message: `a new blog ${blogObject.title} by ${blogObject.author}`,
-        type: "success",
+        type: 'success',
       })
       setTimeout(() => {
         setMessage(null)
@@ -73,7 +81,7 @@ const App = () => {
     } catch (error) {
       setMessage({
         message: error.response.data.error,
-        type: "error",
+        type: 'error',
       })
       setTimeout(() => {
         setMessage(null)
@@ -81,27 +89,76 @@ const App = () => {
     }
   }
 
+  const updateLikes = async (blogObject) => {
+    const updatedBlog = { ...blogObject, likes: blogObject.likes + 1 }
+
+    try {
+      const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
+      const updatedBlogs = blogs
+        .map((blog) => (blog.id !== updatedBlog.id ? blog : returnedBlog))
+        .sort((a, b) => b.likes - a.likes)
+      setBlogs(updatedBlogs)
+    } catch (error) {
+      setMessage({
+        message: 'updated failed',
+        type: 'error',
+      })
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
+  }
+
+  const deleteBlog = async (id) => {
+    try {
+      await blogService.deleteBlog(id)
+      const changedBlogs = blogs
+        .filter((blog) => blog.id !== id)
+        .sort((a, b) => b.likes - a.likes)
+      setBlogs(changedBlogs)
+    } catch (error) {
+      setMessage({
+        message: error.message,
+        type: 'error',
+      })
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
+  }
+
+  const loginForm = () => (
+    <Togglable buttonLabel="log in">
+      <LoginForm handleLogin={handleLogin} />
+    </Togglable>
+  )
+
+  const blogForm = () => (
+    <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+      <BlogForm addBlog={addBlog} />
+    </Togglable>
+  )
+
   return (
     <div>
       <Notification {...message} />
 
       {user === null ? (
-        <LoginForm
-          handleLogin={handleLogin}
-          username={username}
-          password={password}
-          setUsername={setUsername}
-          setPassword={setPassword}
-        />
+        loginForm()
       ) : (
         <div>
           <h2>blogs</h2>
           <p>
             {user.name} logged-in <button onClick={handleLogout}>logout</button>
           </p>
-          <BlogForm addBlog={addBlog} />
+          {blogForm()}
           {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              updateLikes={updateLikes}
+              deleteBlog={deleteBlog}
+            />
           ))}
         </div>
       )}
