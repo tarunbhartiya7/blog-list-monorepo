@@ -11,9 +11,11 @@ import Users from './components/Users'
 import userService from './services/users'
 import Blogs from './components/Blogs'
 import User from './components/User'
+import Blog from './components/Blog'
 
 const App = () => {
   const loggedInUser = useSelector((state) => state.user)
+  const blogs = useSelector((state) => state.blogs)
   const [users, setUsers] = useState([])
   const dispatch = useDispatch()
 
@@ -51,8 +53,15 @@ const App = () => {
     </Togglable>
   )
 
-  const match = useRouteMatch('/users/:id')
-  const user = match ? users.find((user) => user.id === match.params.id) : null
+  const userMatch = useRouteMatch('/users/:id')
+  const user = userMatch
+    ? users.find((user) => user.id === userMatch.params.id)
+    : null
+
+  const blogsMatch = useRouteMatch('/blogs/:id')
+  const blog = blogsMatch
+    ? blogs.find((user) => user.id === blogsMatch.params.id)
+    : null
 
   const padding = {
     padding: '10px',
@@ -74,8 +83,10 @@ const App = () => {
           </Link>
           <h2>blogs</h2>
           <p>
-            {loggedInUser.name} logged-in{' '}
-            <button onClick={handleLogout}>logout</button>
+            {loggedInUser.name} logged in
+            <p>
+              <button onClick={handleLogout}>logout</button>
+            </p>
           </p>
 
           <Switch>
@@ -85,8 +96,11 @@ const App = () => {
             <Route path="/users">
               <Users users={users} />
             </Route>
+            <Route path="/blogs/:id">
+              <Blog blog={blog} />
+            </Route>
             <Route path="/">
-              <Blogs />
+              <Blogs blogs={blogs} />
             </Route>
           </Switch>
         </>

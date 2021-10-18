@@ -1,14 +1,13 @@
 import React, { useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
-import { addLikes, createBlog, removeBlog } from '../reducers/blogReducer'
+import { createBlog } from '../reducers/blogReducer'
 import BlogForm from './BlogForm'
 import Togglable from './Togglable'
-import Blog from './Blog'
+import { Link } from 'react-router-dom'
 
-const Blogs = () => {
+const Blogs = ({ blogs }) => {
   const blogFormRef = useRef()
-  const blogs = useSelector((state) => state.blogs)
   const dispatch = useDispatch()
 
   const addBlog = async (blogObject) => {
@@ -18,14 +17,6 @@ const Blogs = () => {
     } catch (error) {
       console.log(console.error())
     }
-  }
-
-  const updateLikes = async (blogObject) => {
-    dispatch(addLikes(blogObject))
-  }
-
-  const deleteBlog = (id) => {
-    dispatch(removeBlog(id))
   }
 
   const blogForm = () => (
@@ -38,12 +29,9 @@ const Blogs = () => {
     <div>
       {blogForm()}
       {blogs.map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateLikes={updateLikes}
-          deleteBlog={deleteBlog}
-        />
+        <div key={blog.id} className="blogStyle">
+          <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+        </div>
       ))}
     </div>
   )

@@ -70,13 +70,24 @@ export const createBlog = (blogObject) => {
 
 export const initializeBlogs = () => {
   return async (dispatch) => {
-    let initialBlogs = await blogService.getAll()
-    const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
-    dispatch({
-      type: 'INIT_BLOGS',
-      data: sortedBlogs,
-    })
-    // TODO: handle error case
+    try {
+      let initialBlogs = await blogService.getAll()
+      const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
+      dispatch({
+        type: 'INIT_BLOGS',
+        data: sortedBlogs,
+      })
+    } catch (error) {
+      dispatch(
+        setNotification(
+          {
+            message: 'Error in fetching blogs',
+            type: 'error',
+          },
+          5
+        )
+      )
+    }
   }
 }
 

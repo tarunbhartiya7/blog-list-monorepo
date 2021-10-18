@@ -1,33 +1,42 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useDispatch } from 'react-redux'
+import { useHistory } from 'react-router-dom'
 
-const Blog = ({ blog, updateLikes, deleteBlog }) => {
-  const [showDetails, setShowDetails] = useState(false)
+import { addLikes, removeBlog } from '../reducers/blogReducer'
 
-  const handleRemove = () => {
+const Blog = ({ blog }) => {
+  const dispatch = useDispatch()
+  const history = useHistory()
+
+  const updateLikes = async (blogObject) => {
+    dispatch(addLikes(blogObject))
+  }
+
+  const deleteBlog = () => {
     const toBeDeleted = window.confirm(
       `Remove blog ${blog.title} by ${blog.author}`
     )
-    if (toBeDeleted) deleteBlog(blog.id)
+    if (toBeDeleted) {
+      dispatch(removeBlog(blog.id))
+      history.push('/')
+    }
+  }
+
+  if (!blog) {
+    return null
   }
 
   return (
-    <div className="blogStyle">
-      {blog.title} {blog.author}{' '}
-      <button onClick={() => setShowDetails(!showDetails)}>
-        {showDetails ? 'hide' : 'view'}
-      </button>
-      {showDetails && (
-        <>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes}{' '}
-            <button onClick={() => updateLikes(blog)}>like</button>
-          </div>
-          <div>{blog.user && blog.user.name}</div>
-          <button onClick={handleRemove}>remove</button>
-        </>
-      )}
-    </div>
+    <>
+      <h3>{blog.title}</h3>
+      <a href={blog.url}>{blog.url}</a>
+      <p>
+        {blog.likes} likes{' '}
+        <button onClick={() => updateLikes(blog)}>like</button>
+      </p>
+      <p>added by {blog.user && blog.user.name}</p>
+      <button onClick={deleteBlog}>remove</button>
+    </>
   )
 }
 
