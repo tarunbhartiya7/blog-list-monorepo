@@ -1,6 +1,10 @@
 import React from 'react'
 
 const User = ({ user }) => {
+  if (!user) {
+    return null
+  }
+
   return (
     <>
       <h3>{user.name}</h3>
