@@ -63,32 +63,20 @@ const App = () => {
     ? blogs.find((user) => user.id === blogsMatch.params.id)
     : null
 
-  const padding = {
-    padding: '10px',
-  }
-
   return (
     <>
       <Notification />
-
       {loggedInUser === null ? (
         loginForm()
       ) : (
         <>
-          <Link style={padding} to="/">
-            home
-          </Link>
-          <Link style={padding} to="/users">
-            users
-          </Link>
+          <div className="navStyle">
+            <Link to="/">blogs </Link>
+            <Link to="/users">users </Link>
+            {loggedInUser.name} logged in{' '}
+            <button onClick={handleLogout}>logout</button>
+          </div>
           <h2>blogs</h2>
-          <p>
-            {loggedInUser.name} logged in
-            <p>
-              <button onClick={handleLogout}>logout</button>
-            </p>
-          </p>
-
           <Switch>
             <Route path="/users/:id">
               <User user={user} />
