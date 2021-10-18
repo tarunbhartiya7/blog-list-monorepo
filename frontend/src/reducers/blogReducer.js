@@ -1,4 +1,5 @@
 import blogService from '../services/blogs'
+import { setNotification } from './notificationReducer'
 
 const blogReducer = (state = [], action) => {
   switch (action.type) {
@@ -38,11 +39,32 @@ export const addVote = (vote) => {
 
 export const createBlog = (blogObject) => {
   return async (dispatch) => {
-    const newBlog = await blogService.create(blogObject)
-    dispatch({
-      type: 'NEW_BLOG',
-      data: newBlog,
-    })
+    try {
+      const newBlog = await blogService.create(blogObject)
+      dispatch({
+        type: 'NEW_BLOG',
+        data: newBlog,
+      })
+      dispatch(
+        setNotification(
+          {
+            message: `a new blog ${blogObject.title} by ${blogObject.author}`,
+            type: 'success',
+          },
+          5
+        )
+      )
+    } catch (error) {
+      dispatch(
+        setNotification(
+          {
+            message: error.response.data.error,
+            type: 'error',
+          },
+          5
+        )
+      )
+    }
   }
 }
 
@@ -60,11 +82,23 @@ export const initializeBlogs = () => {
 
 export const removeBlog = (id) => {
   return async (dispatch) => {
-    await blogService.deleteBlog(id)
-    dispatch({
-      type: 'REMOVE_BLOG',
-      data: id,
-    })
+    try {
+      await blogService.deleteBlog(id)
+      dispatch({
+        type: 'REMOVE_BLOG',
+        data: id,
+      })
+    } catch (error) {
+      dispatch(
+        setNotification(
+          {
+            message: 'Error in removing blog',
+            type: 'error',
+          },
+          5
+        )
+      )
+    }
   }
 }
 

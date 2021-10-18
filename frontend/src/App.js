@@ -1,90 +1,52 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import Togglable from './components/Togglable'
-import { setNotification } from './reducers/notificationReducer'
 import {
   addLikes,
   createBlog,
   initializeBlogs,
   removeBlog,
 } from './reducers/blogReducer'
+import { login, logout, setUser } from './reducers/userReducer'
+import Users from './components/Users'
 
 const App = () => {
   const blogs = useSelector((state) => state.blogs)
-  const [user, setUser] = useState(null)
+  const user = useSelector((state) => state.user)
   const blogFormRef = useRef()
   const dispatch = useDispatch()
-
-  useEffect(() => {
-    if (user) dispatch(initializeBlogs())
-  }, [dispatch, user])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+      dispatch(setUser(user))
     }
   }, [])
 
+  useEffect(() => {
+    if (user) dispatch(initializeBlogs())
+  }, [dispatch, user])
+
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogAppUser')
-    setUser(null)
+    dispatch(logout())
   }
 
   const handleLogin = async (userObject) => {
-    try {
-      const user = await loginService.login(userObject)
-
-      blogService.setToken(user.token)
-      window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
-
-      setUser(user)
-    } catch (error) {
-      dispatch(
-        setNotification(
-          {
-            message: 'Wrong credentials',
-            type: 'error',
-          },
-          5
-        )
-      )
-    }
+    dispatch(login(userObject))
   }
 
   const addBlog = async (blogObject) => {
-    // TODO: handle error scenario
     try {
-      dispatch(createBlog(blogObject))
+      await dispatch(createBlog(blogObject))
       blogFormRef.current.toggleVisibility()
-      dispatch(
-        setNotification(
-          {
-            message: `a new blog ${blogObject.title} by ${blogObject.author}`,
-            type: 'success',
-          },
-          5
-        )
-      )
     } catch (error) {
-      dispatch(
-        setNotification(
-          {
-            message: error.response.data.error,
-            type: 'error',
-          },
-          5
-        )
-      )
+      console.log(console.error())
     }
   }
 
@@ -120,6 +82,8 @@ const App = () => {
           <p>
             {user.name} logged-in <button onClick={handleLogout}>logout</button>
           </p>
+          <h2>Users</h2>
+          <Users />
           {blogForm()}
           {blogs.map((blog) => (
             <Blog
