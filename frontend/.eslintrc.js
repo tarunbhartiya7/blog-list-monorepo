@@ -16,7 +16,6 @@ module.exports = {
   },
   plugins: ['react', 'jest', 'cypress'],
   rules: {
-    indent: ['error', 2],
     'linebreak-style': ['error', 'unix'],
     quotes: ['error', 'single'],
     semi: ['error', 'never'],
@@ -26,6 +25,7 @@ module.exports = {
     'arrow-spacing': ['error', { before: true, after: true }],
     'no-console': 0,
     'react/prop-types': 0,
+    'no-unused-vars': 1,
   },
   settings: {
     react: {

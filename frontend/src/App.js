@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
@@ -6,32 +8,23 @@ import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
+import { setNotification } from './reducers/notificationReducer'
+import {
+  addLikes,
+  createBlog,
+  initializeBlogs,
+  removeBlog,
+} from './reducers/blogReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [message, setMessage] = useState(null)
+  const blogs = useSelector((state) => state.blogs)
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        let initialBlogs = await blogService.getAll()
-        const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
-        setBlogs(sortedBlogs)
-      } catch (error) {
-        setMessage({
-          message: 'cannot get blog data',
-          type: 'error',
-        })
-        setTimeout(() => {
-          setMessage(null)
-        }, 5000)
-      }
-    }
-
-    if (user) fetchBlogs()
-  }, [user])
+    if (user) dispatch(initializeBlogs())
+  }, [dispatch, user])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
@@ -56,75 +49,51 @@ const App = () => {
 
       setUser(user)
     } catch (error) {
-      setMessage({
-        message: 'Wrong credentials',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        setNotification(
+          {
+            message: 'Wrong credentials',
+            type: 'error',
+          },
+          5
+        )
+      )
     }
   }
 
   const addBlog = async (blogObject) => {
+    // TODO: handle error scenario
     try {
-      const returnedBlog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(returnedBlog))
+      dispatch(createBlog(blogObject))
       blogFormRef.current.toggleVisibility()
-      setMessage({
-        message: `a new blog ${blogObject.title} by ${blogObject.author}`,
-        type: 'success',
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        setNotification(
+          {
+            message: `a new blog ${blogObject.title} by ${blogObject.author}`,
+            type: 'success',
+          },
+          5
+        )
+      )
     } catch (error) {
-      setMessage({
-        message: error.response.data.error,
-        type: 'error',
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        setNotification(
+          {
+            message: error.response.data.error,
+            type: 'error',
+          },
+          5
+        )
+      )
     }
   }
 
   const updateLikes = async (blogObject) => {
-    const updatedBlog = { ...blogObject, likes: blogObject.likes + 1 }
-
-    try {
-      const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
-      const updatedBlogs = blogs
-        .map((blog) => (blog.id !== updatedBlog.id ? blog : returnedBlog))
-        .sort((a, b) => b.likes - a.likes)
-      setBlogs(updatedBlogs)
-    } catch (error) {
-      setMessage({
-        message: 'updated failed',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-    }
+    dispatch(addLikes(blogObject))
   }
 
-  const deleteBlog = async (id) => {
-    try {
-      await blogService.deleteBlog(id)
-      const changedBlogs = blogs
-        .filter((blog) => blog.id !== id)
-        .sort((a, b) => b.likes - a.likes)
-      setBlogs(changedBlogs)
-    } catch (error) {
-      setMessage({
-        message: error.message,
-        type: 'error',
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-    }
+  const deleteBlog = (id) => {
+    dispatch(removeBlog(id))
   }
 
   const loginForm = () => (
@@ -141,7 +110,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification {...message} />
+      <Notification />
 
       {user === null ? (
         loginForm()
