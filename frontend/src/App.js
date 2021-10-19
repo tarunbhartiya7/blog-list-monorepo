@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Switch, Route, useRouteMatch, Link } from 'react-router-dom'
+import { Switch, Route, useRouteMatch } from 'react-router-dom'
 
 import LoginForm from './components/LoginForm'
 import Notification from './components/Notification'
@@ -12,6 +12,7 @@ import userService from './services/users'
 import Blogs from './components/Blogs'
 import User from './components/User'
 import Blog from './components/Blog'
+import Navigation from './components/Navigation'
 
 const App = () => {
   const loggedInUser = useSelector((state) => state.user)
@@ -70,12 +71,7 @@ const App = () => {
         loginForm()
       ) : (
         <>
-          <div className="navStyle">
-            <Link to="/">blogs </Link>
-            <Link to="/users">users </Link>
-            {loggedInUser.name} logged in{' '}
-            <button onClick={handleLogout}>logout</button>
-          </div>
+          <Navigation handleLogout={handleLogout} loggedInUser={loggedInUser} />
           <h2>blogs</h2>
           <Switch>
             <Route path="/users/:id">

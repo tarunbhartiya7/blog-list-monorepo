@@ -1,6 +1,5 @@
 import blogService from '../services/blogs'
 import { setNotification } from './notificationReducer'
-import { logout } from './userReducer'
 
 const blogReducer = (state = [], action) => {
   switch (action.type) {
@@ -54,25 +53,12 @@ export const createBlog = (blogObject) => {
 
 export const initializeBlogs = () => {
   return async (dispatch) => {
-    try {
-      let initialBlogs = await blogService.getAll()
-      const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
-      dispatch({
-        type: 'INIT_BLOGS',
-        data: sortedBlogs,
-      })
-    } catch (error) {
-      dispatch(
-        setNotification(
-          {
-            message: 'Error in fetching blogs',
-            type: 'error',
-          },
-          5
-        )
-      )
-      dispatch(logout())
-    }
+    let initialBlogs = await blogService.getAll()
+    const sortedBlogs = initialBlogs.sort((a, b) => b.likes - a.likes)
+    dispatch({
+      type: 'INIT_BLOGS',
+      data: sortedBlogs,
+    })
   }
 }
 

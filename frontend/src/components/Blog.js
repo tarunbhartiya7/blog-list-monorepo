@@ -1,3 +1,4 @@
+import { Button } from '@material-ui/core'
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
@@ -33,10 +34,18 @@ const Blog = ({ blog }) => {
       <a href={blog.url}>{blog.url}</a>
       <p>
         {blog.likes} likes{' '}
-        <button onClick={() => updateLikes(blog)}>like</button>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => updateLikes(blog)}
+        >
+          like
+        </Button>
       </p>
       <p>added by {blog.user && blog.user.name}</p>
-      <button onClick={deleteBlog}>remove</button>
+      <Button variant="outlined" color="secondary" onClick={deleteBlog}>
+        remove
+      </Button>
 
       <Comment blog={blog} />
     </>
