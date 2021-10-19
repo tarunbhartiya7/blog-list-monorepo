@@ -1,5 +1,6 @@
 import blogService from '../services/blogs'
 import { setNotification } from './notificationReducer'
+import { logout } from './userReducer'
 
 const blogReducer = (state = [], action) => {
   switch (action.type) {
@@ -11,29 +12,12 @@ const blogReducer = (state = [], action) => {
       return state
         .filter((item) => item.id !== action.data)
         .sort((a, b) => b.likes - a.likes)
-    case 'ADD_LIKES':
+    case 'UPDATE_BLOG':
       return state
         .map((blog) => (blog.id !== action.data.id ? blog : action.data))
         .sort((a, b) => b.likes - a.likes)
     default:
       return state
-  }
-}
-
-export const addVote = (vote) => {
-  const { id, votes, content } = vote
-  const newObject = {
-    content,
-    id,
-    votes: votes + 1,
-  }
-
-  return async (dispatch) => {
-    await blogService.update(id, newObject)
-    dispatch({
-      type: 'VOTE',
-      data: { id },
-    })
   }
 }
 
@@ -87,6 +71,7 @@ export const initializeBlogs = () => {
           5
         )
       )
+      dispatch(logout())
     }
   }
 }
@@ -118,8 +103,21 @@ export const addLikes = (blogObject) => {
     const updatedBlog = { ...blogObject, likes: blogObject.likes + 1 }
     const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
     dispatch({
-      type: 'ADD_LIKES',
+      type: 'UPDATE_BLOG',
       data: returnedBlog,
+    })
+  }
+}
+
+export const addCommentToBlog = (blog, description) => {
+  return async (dispatch) => {
+    const result = await blogService.addComment(blog.id, { description })
+    dispatch({
+      type: 'UPDATE_BLOG',
+      data: {
+        ...blog,
+        comments: [...blog.comments, result],
+      },
     })
   }
 }

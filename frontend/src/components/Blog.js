@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
 import { addLikes, removeBlog } from '../reducers/blogReducer'
+import Comment from './Comment'
 
 const Blog = ({ blog }) => {
   const dispatch = useDispatch()
@@ -36,6 +37,8 @@ const Blog = ({ blog }) => {
       </p>
       <p>added by {blog.user && blog.user.name}</p>
       <button onClick={deleteBlog}>remove</button>
+
+      <Comment blog={blog} />
     </>
   )
 }
